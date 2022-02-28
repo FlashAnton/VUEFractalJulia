@@ -1,0 +1,142 @@
+<HTML>
+
+	<TITLE>Фрактальная графика</TITLE>
+
+	<BODY>
+
+		<SCRIPT SRC="Vue.js"></SCRIPT>
+
+		<div id="fractal">
+			
+			<br>
+			<svg 
+				:width="wi" 
+				:height="hi">
+				
+				<rect v-for="p in pixels" 
+						:fill="p.color"
+						:fill-opacity="p.alpha"
+						:x="p.x" 
+						:y="p.y" 
+						width="1" 
+						height="1"/>
+			</svg>
+		</div>
+		
+		<SCRIPT>	
+			var myView = new Vue(
+			{
+				el: "#fractal",
+				
+				data:
+				{
+					wi: 800,
+					hi: 600,
+					pixels: [],
+				},
+				
+				//Реактивно вычисляемые функции
+				computed:
+				{
+							
+				},
+				
+				//Раздел методов фреймворка
+				methods:
+				{	
+					drawFractal:function()
+					{
+						this.pixels = [];
+						
+						var cIm = 0.62662;
+						var cRe = -0.38135;
+						
+						var newRe;
+						var newIm; 
+						var oldRe;
+						var oldIm;
+						
+						var zoom = 1;
+						var moveX = 0;
+						var moveY = 0;
+						
+						var maxIter = 300;
+						
+						for (var x = 0; x < this.wi; x++)
+							for (var y = 0; y < this.hi; y++)
+							{
+								newRe = 1.5 * (x - this.wi / 2) / (0.5 * zoom * this.wi) + moveX;
+								newIm = (y - this.hi / 2) / (0.5 * zoom * this.hi) + moveY;
+								
+								var i;
+								
+								for (i = 0; i < maxIter; i++)
+								{
+									oldRe = newRe;
+									oldIm = newIm;
+
+									newRe = (oldRe * oldRe) - (oldIm * oldIm) + cRe;
+									newIm = 2 * oldRe * oldIm + cIm;
+								    
+									if ((newRe * newRe + newIm * newIm) > 4)
+									{
+										break;
+									}
+								}
+								
+								var pix = new Object();
+								pix.x = x;
+								pix.y = y;
+								
+								var R = (i * 9) % 255;
+								var G = 0;
+								var B = (i * 9) % 255;
+								
+								pix.color = "#" + (R.toString(16).length < 2 ? "0" + R.toString(16) : R.toString(16)) 
+												+ (G.toString(16).length < 2 ? "0" + G.toString(16) : G.toString(16)) 
+												+ (B.toString(16).length < 2 ? "0" + B.toString(16) : B.toString(16));
+								//console.log(pix.color);				
+												
+								pix.alpha = 1;
+								this.pixels.push(pix);
+							}
+							
+						var now = new Date();
+						console.log("Завершено построение: " + now + " мс: " + now.getMilliseconds());
+					},
+
+
+				},
+				
+				//
+				created: function()
+				{
+					var now = new Date();
+					console.log("Начато построение: " + now + " мс: " + now.getMilliseconds());
+					this.drawFractal();
+				},
+				
+				//
+				mounted: function()
+				{
+					var now = new Date();
+					console.log("Отображено на странице: " + now + " мс: " + now.getMilliseconds());
+				},
+			});
+		</SCRIPT>
+
+		<STYLE TYPE="text/css">
+			svg
+			{
+				border: 1px solid #000000;
+			}
+			
+			input
+			{
+				width:60px;
+			}
+		</STYLE>
+
+	</BODY>
+
+</HTML>
